@@ -219,10 +219,22 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
             registered));
     }
 
+    /**
+     * 服务注册的起点
+     * 主要处理<dubbo:service ref="" />数据
+     * @param originInvoker
+     * @param <T>
+     * @return
+     * @throws RpcException
+     */
     @Override
     public <T> Exporter<T> export(final Invoker<T> originInvoker) throws RpcException {
+        //获取注册的url
+        //service-discovery-registry://myhost:2181/org.apache.dubbo.registry.RegistryService?application=dubbo-provider&dubbo=2.0.2&pid=8304&qos.enable=false&registry=zookeeper&release=3.0.0&timestamp=1658653022552
         URL registryUrl = getRegistryUrl(originInvoker);
         // url to export locally
+        //获取provider元数据链接
+        //dubbo://192.168.1.5:20880/com.ab.demo.DemoService?anyhost=true&application=dubbo-provider&bind.ip=192.168.1.5&bind.port=20880&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=com.ab.demo.DemoService&metadata-type=remote&methods=sayHello&pid=8304&qos.enable=false&release=3.0.0&revision=1.0.0&side=provider&timestamp=1658653022563&version=1.0.0
         URL providerUrl = getProviderUrl(originInvoker);
 
         // Subscribe the override data
@@ -236,6 +248,7 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
 
         providerUrl = overrideUrlWithConfig(providerUrl, overrideSubscribeListener);
         //export invoker
+        //暴露本地端口
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker, providerUrl);
 
         // url to registry
